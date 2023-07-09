@@ -1,36 +1,24 @@
-from typing import Type
-import ddt
-from _pytest import unittest
+import pytest
 
-from action import RemoteWebDriver, Runner
 from src.base.models import BaseTestSuite
-from sanmu.webdriver import get_webdriver
-def create_tests(test_suite: BaseTestSuite) -> Type[unittest.TestCase]:
-    @ddt.ddt
-    class Test(unittest.TestCase):
-        _test_name = test_suite.info.name
-        driver: RemoteWebDriver
+from src.pre_process.extract import parse
 
-        @classmethod
-        def setUpClass(cls) -> None:
-            cls.driver = get_webdriver(test_suite.info.browser)
+from _pytest.python import PyCollector
+from _pytest.unittest import UnitTestCase as pytestUnitTestCase
 
-        @classmethod
-        def tearDownClass(cls) -> None:
-            cls.driver.quit()
+class ExcelFile(pytest.File, PyCollector):
+    def _getobj(self):
+        return self
 
-        @ddt.data(*create_runner(test_suite))
-        def test(self, runner: Runner):
-            runner.run(self)
+    def collect(self):
+        for _suite_data in parse.parseSheet(self.fspath):
+            suite = BaseTestSuite(**_suite_data)
 
-        def id(self) -> str:
-            return "%s.%s" % (self._test_name, self._testMethodName)
-
-        def __str__(self):
-            return "%s (%s:%s)" % (
-                self._testMethodName,
-                "SanmuTestCae",
-                self._test_name,
+            obj = create_tests(suite)
+            # yield ExcelItem.from_parent(self, suite=suite, case=case)
+            item = UnitTestCase.from_parent(
+                self,
+                name=suite.info.name,
+                obj=obj,
             )
-
-    return Test
+            yield item

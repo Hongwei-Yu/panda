@@ -8,10 +8,13 @@ class parse:
         self._file = file
 
     def getCaseTest(self):
+        pass
 
 
-    def parseSheet(self):
-        sheet = pd.read_excel(self._file)
+    def parseSheet(self,file):
+        if file is None:
+            file = self._file
+        sheet = pd.read_excel(file)
         stop = 0
         caseList = []
         步骤集 = []
@@ -42,7 +45,9 @@ class parse:
         return newCase
 
 if __name__ == '__main__':
-    parser = parse(file = 'E:\github.com\python_project\工作簿1.xlsx')
-    a = parser.parseSheet()
-
+    parser = parse(file = "c:/Users/xzl/Downloads/工作簿1.xlsx")
+    a = parser.parseSheet(None)
     print(a)
+    from src.base.models import BaseTestCase
+    suit = BaseTestCase(**a)
+    print(suit)

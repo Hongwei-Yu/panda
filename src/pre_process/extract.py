@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-
+from src.base.models import *
 
 class parse:
     def __init__(self, filetype='excel', file='./TestCase'):
@@ -8,13 +8,18 @@ class parse:
         self._file = file
 
     def getCaseTest(self):
-        pass
+        excel = pd.read_excel(self._file)
+
+        for sheet in excel:
+            self.parseSheet(sheet)
 
 
-    def parseSheet(self,file):
+    def parseSheet(self,sheet=None,file=None):
         if file is None:
             file = self._file
-        sheet = pd.read_excel(file)
+        if sheet is None:
+            sheet = pd.read_excel(file)
+        print(sheet.keys())
         stop = 0
         caseList = []
         步骤集 = []
@@ -33,21 +38,20 @@ class parse:
                 步骤集.append(self.copyrow(row[1]))
                 if row[0]+1 == length:
                     caseList.append(self.copyCase(测试用例编号, 测试用例名, 步骤集))
-        return caseList
+        return {'name':'testsuit','case_list':caseList}
 
     def copyrow(self,row):
-        步骤 = {'步骤序号': row['步骤序号'], '步骤名': row['步骤名'], '关键字': row['关键字'],
-                '元素标识': row['元素标识'], '元素路径': row['元素路径'], '参数': row['参数']}
+        步骤 = {'步骤序号': str(row['步骤序号']), '步骤名': str(row['步骤名']), '关键字': str(row['关键字']),
+                '元素标识': str(row['元素标识']), '元素路径': str(row['元素路径']), '参数': str(row['参数'])}
         return 步骤
 
-    def copyCase(self,测试用例编号, 测试用例名, 步骤):
-        newCase = {'测试用例编号': 测试用例编号, '测试用例名': 测试用例名, '步骤': 步骤}
+    def copyCase(self,测试用例编号, 测试用例名, 步骤集):
+        newCase = {'info':{'测试用例编号': str(测试用例编号), '测试用例名': 测试用例名}, '步骤': 步骤集}
         return newCase
 
 if __name__ == '__main__':
-    parser = parse(file = "c:/Users/xzl/Downloads/工作簿1.xlsx")
+    parser = parse(file = "E:\github.com\python_project\工作簿1.xlsx")
     a = parser.parseSheet(None)
     print(a)
-    from src.base.models import BaseTestCase
-    suit = BaseTestCase(**a)
+    suit = BaseTestSuite(**a)
     print(suit)

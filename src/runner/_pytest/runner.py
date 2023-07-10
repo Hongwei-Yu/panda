@@ -1,10 +1,12 @@
 import pytest
-from sanmu.excel import load_exce_all_sheet
-from sanmu.models import BaseTestSuite
-from sanmu.runner._unittest.runner import create_tests
+
+from src.base.models import BaseTestSuite
+from src.pre_process.extract import parse
 
 from _pytest.python import PyCollector
-from _pytest.unittest import UnitTestCase as pytestUnitTestCase
+from _pytest.unittest import UnitTestCase as pytestUnitTestCase, UnitTestCase
+
+from src.runner._unittest.runner import create_tests
 
 
 class MyPlugin:
@@ -25,18 +27,18 @@ class ExcelFile(pytest.File, PyCollector):
         return self
 
     def collect(self):
-        for _suite_data in load_exce_all_sheet(self.fspath):
+        parser = parse(file=self.fspath)
+        for _suite_data in parser.getCaseTest():
             suite = BaseTestSuite(**_suite_data)
 
             obj = create_tests(suite)
             # yield ExcelItem.from_parent(self, suite=suite, case=case)
             item = UnitTestCase.from_parent(
                 self,
-                name=suite.info.name,
+                name=suite.name,
                 obj=obj,
             )
             yield item
-
 
 class UnitTestCase(pytestUnitTestCase):
     @classmethod
@@ -45,3 +47,10 @@ class UnitTestCase(pytestUnitTestCase):
         s = super().from_parent(name=name, parent=parent)
         s.obj = obj
         return s
+
+# if __name__=='__main__':
+#     parser = parse(file="D:\\A\\github.com\\PY\\panda\\src\\test_web.xlsx")
+#     for _suite_data in parser.getCaseTest():
+#         print("解析后的suit_data")
+#         print(_suite_data)
+#         suite = BaseTestSuite(**_suite_data)

@@ -5,25 +5,28 @@ from pydantic import BaseModel
 
 class TestInfo(BaseModel):
     """用例信息"""
-    测试用例编号: str
-    测试用例名: str
+    testcase_num: str
+    testcase_name: str
 
 
 class TestStep(BaseModel):
     """用例步骤"""
-    步骤序号: str
-    步骤名: str
-    关键字: str
-    元素标识: Optional[str]
-    元素路径: str
-    参数: str
+    step_num: str
+    step_name: str
+    kw: str
+    ele_mark: Optional[str]
+    ele_path: str
+    param: str
+    verify_kw:str
+    verify_exp:str
+
 
 
 class BaseTestCase(BaseModel):
     """测试用例"""
 
     info: TestInfo
-    步骤: List[TestStep]
+    steps: List[TestStep]
 
 
 class BaseTestSuite(BaseModel):

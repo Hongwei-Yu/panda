@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from src.base.models import *
+
 
 class parse:
     def __init__(self, filetype='excel', file='./TestCase'):
@@ -8,18 +8,18 @@ class parse:
         self._file = file
 
     def getCaseTest(self):
-        excel = pd.read_excel(self._file)
+        excel = pd.read_excel(self._file, sheet_name=None)
 
         for sheet in excel:
-            self.parseSheet(sheet)
+            print("这里是sheet\t" + sheet)
+            yield self.parseSheet(sheet=excel[sheet])
 
-
-    def parseSheet(self,sheet=None,file=None):
+    def parseSheet(self, sheet=None, file=None):
         if file is None:
             file = self._file
         if sheet is None:
             sheet = pd.read_excel(file)
-        print(sheet.keys())
+        # print(sheet.keys())
         stop = 0
         caseList = []
         步骤集 = []
@@ -27,7 +27,7 @@ class parse:
         for row in sheet.iterrows():
             if np.isnan(row[1]['测试用例编号']) == False and stop == 0:
                 if row[0] != 0:
-                    caseList.append(self.copyCase(测试用例编号, 测试用例名,步骤集))
+                    caseList.append(self.copyCase(测试用例编号, 测试用例名, 步骤集))
                     步骤集 = []
                 测试用例编号 = row[1]['测试用例编号']
                 测试用例名 = row[1]['测试用例名']
@@ -36,22 +36,16 @@ class parse:
             else:
                 stop = 0
                 步骤集.append(self.copyrow(row[1]))
-                if row[0]+1 == length:
+                if row[0] + 1 == length:
                     caseList.append(self.copyCase(测试用例编号, 测试用例名, 步骤集))
-        return {'name':'testsuit','case_list':caseList}
+        return {'name': 'testsuit', 'case_list': caseList}
 
-    def copyrow(self,row):
-        步骤 = {'步骤序号': str(row['步骤序号']), '步骤名': str(row['步骤名']), '关键字': str(row['关键字']),
-                '元素标识': str(row['元素标识']), '元素路径': str(row['元素路径']), '参数': str(row['参数'])}
+    def copyrow(self, row):
+        步骤 = {'step_num': str(row['步骤序号']), 'step_name': str(row['步骤名']), 'kw': str(row['关键字']),
+                'ele_mark': str(row['元素标识']), 'ele_path': str(row['元素路径']), 'param': str(row['参数']),
+                'verify_kw': str(row['验证关键字']), 'verify_exp': str(row['验证表达式'])}
         return 步骤
 
-    def copyCase(self,测试用例编号, 测试用例名, 步骤集):
-        newCase = {'info':{'测试用例编号': str(测试用例编号), '测试用例名': 测试用例名}, '步骤': 步骤集}
+    def copyCase(self, 测试用例编号, 测试用例名, 步骤集):
+        newCase = {'info': {'testcase_num': str(测试用例编号), 'testcase_name': 测试用例名}, 'steps': 步骤集}
         return newCase
-
-if __name__ == '__main__':
-    parser = parse(file = "C:\\Users\\xzl\\Downloads\\工作簿1.xlsx")
-    a = parser.parseSheet(None)
-    print(a)
-    suit = BaseTestSuite(**a)
-    print(suit)

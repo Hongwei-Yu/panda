@@ -2,6 +2,7 @@ import allure
 from selenium import webdriver
 from selenium.webdriver.edge.service import Service as EdgeService
 from webdriver_manager.microsoft import EdgeChromiumDriverManager
+from selenium.webdriver.edge.options import Options
 
 
 @allure.step("启动浏览器")
@@ -17,7 +18,9 @@ def get_webdriver(browser):
 
 def driver_init_Edge():
     service = EdgeService(executable_path=EdgeChromiumDriverManager().install())
-    driver = webdriver.Edge(service=service)
+    options = Options()
+    options.page_load_strategy = 'normal'
+    driver = webdriver.Edge(service=service, options=options)
     driver.maximize_window()
     return driver
 

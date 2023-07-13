@@ -50,7 +50,7 @@ class parse:
         return newCase
 
 if __name__ == '__main__':
-    parser = parse(file = "E:\github.com\python_project\工作簿1.xlsx")
+    parser = parse(file = "C:\\Users\\xzl\\Downloads\\工作簿1.xlsx")
     a = parser.parseSheet(None)
     print(a)
     suit = BaseTestSuite(**a)

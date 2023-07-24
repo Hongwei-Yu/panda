@@ -1,11 +1,8 @@
 import pytest
-
 from src.base.models import BaseTestSuite
 from src.pre_process.extract import parse
-
 from _pytest.python import PyCollector
 from _pytest.unittest import UnitTestCase as pytestUnitTestCase, UnitTestCase
-
 from src.runner._unittest.runner import create_tests
 
 
@@ -13,14 +10,12 @@ class MyPlugin:
     def pytest_collect_file(self, parent, path):
         if path.ext == ".xlsx" and path.basename.startswith("test"):
             return ExcelFile.from_parent(parent, fspath=path)
-
     def pytest_html_results_table_row(self, report, cells):
         """fix： pytest-html文件名乱码问题"""
+        # report.nodeid = report.nodeid.encode("unicode_escape").decode("utf-8")
         if report.fspath.endswith(".xlsx"):
             from py.xml import html
-
             cells[1] = html.td(report.nodeid, class_="col-name")
-
 
 class ExcelFile(pytest.File, PyCollector):
     def _getobj(self):
@@ -39,6 +34,7 @@ class ExcelFile(pytest.File, PyCollector):
                 obj=obj,
             )
             yield item
+
 
 class UnitTestCase(pytestUnitTestCase):
     @classmethod

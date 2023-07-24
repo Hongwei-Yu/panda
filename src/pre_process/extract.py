@@ -12,14 +12,16 @@ class parse:
 
         for sheet in excel:
             print("这里是sheet\t" + sheet)
-            yield self.parseSheet(sheet=excel[sheet])
+            yield self.parseSheet(sheet=excel[sheet],sheetName=sheet)
 
-    def parseSheet(self, sheet=None, file=None):
+    def parseSheet(self, sheet=None, file=None,sheetName=None):
         if file is None:
             file = self._file
         if sheet is None:
             sheet = pd.read_excel(file)
         # print(sheet.keys())
+        if sheetName is None:
+            sheetName = "Testsuit"
         stop = 0
         caseList = []
         步骤集 = []
@@ -38,7 +40,7 @@ class parse:
                 步骤集.append(self.copyrow(row[1]))
                 if row[0] + 1 == length:
                     caseList.append(self.copyCase(测试用例编号, 测试用例名, 步骤集))
-        return {'name': 'testsuit', 'case_list': caseList}
+        return {'name': sheetName, 'case_list': caseList}
 
     def copyrow(self, row):
         步骤 = {'step_num': str(row['步骤序号']), 'step_name': str(row['步骤名']), 'kw': str(row['关键字']),

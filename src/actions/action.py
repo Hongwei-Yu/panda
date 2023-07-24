@@ -1,4 +1,5 @@
 import time
+from logging import log
 from typing import Optional
 
 import unittest
@@ -7,9 +8,9 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webdriver import WebDriver as RemoteWebDriver
 from selenium.webdriver.remote.webdriver import WebElement as RemoteWebElement
 from selenium.webdriver.support.wait import WebDriverWait
-
+from src.errProcess.Image import SaveImage
 from src.base.models import BaseTestCase
-
+from pytest_html import extras
 
 class KeyWord:
     _all_keyword = None
@@ -21,7 +22,7 @@ class KeyWord:
         self.save_value ={}
 
     def find_element(self, value: str) -> RemoteWebElement:
-        return WebDriverWait(self.webdriver, 10, 5).until(
+        return WebDriverWait(self.webdriver, 20, 5).until(
             lambda x: self.webdriver.find_element(By.XPATH, value)
         )
 
@@ -34,11 +35,13 @@ class KeyWord:
         ele = self.find_element(step.ele_path)
 
     def key_click(self, step):
+        # time.sleep(3)
         ele = self.find_element(step.ele_path)
 
         ele.click()
 
     def key_input(self, step):
+        # time.sleep(3)
         ele = self.find_element(step.ele_path)
 
         ele.clear()
@@ -46,15 +49,22 @@ class KeyWord:
 
     def key_getSave(self,step):
         ele = self.find_element(step.ele_path)
+        if ele.text == "":
+            self.save_value[step.param] = ele.get_attribute("innerText")
+            return
         self.save_value[step.param] = ele.text
 
     def key_inputSave(self,step):
         ele = self.find_element(step.ele_path)
         ele.clear()
         ele.send_keys(self.save_value[step.param])
-        time.sleep(3)
+        # time.sleep(3)
+
+    def key_sleep(self,step):
+        time.sleep(float(step.param))
+        # self.webdriver.implicitly_wait(step.param)
     def key_verify(self, step):
-        time.sleep(5)
+        time.sleep(2)
         validator = Validator(self,
                               step.ele_path,
                               step.verify_kw,
@@ -63,6 +73,7 @@ class KeyWord:
                               # args,
                               )
         validator.is_valid()
+
 
 
 class Validator:
@@ -121,8 +132,9 @@ class Validator:
 
     @staticmethod
     def get_ele_text(ele: RemoteWebElement):
+        if ele.text == "":
+            return ele.get_attribute("innerText")
         return ele.text
-
 class Runner:
 
     def __init__(self, case: BaseTestCase):
@@ -136,11 +148,13 @@ class Runner:
 
         for index, step in enumerate(self.case.steps, start=1):
             step_func = getattr(action, f"key_{step.kw}")
-            print(f"{index}. {step.step_num} {step.step_name} ... ... ", end="")
+            print(f"{step.step_num} {step.step_name} ... ... ", end="")
             try:
                 step_func(step)
-                # time.sleep(5)
+                time.sleep(0.5)
                 print("OK <br />")
             except Exception as e:
+
                 print("Error <br />")
+                print(f"错误步骤：{step.step_name} \n")
                 raise e

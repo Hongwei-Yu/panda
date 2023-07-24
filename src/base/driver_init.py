@@ -19,7 +19,7 @@ def get_webdriver(browser):
 def driver_init_Edge():
     service = EdgeService(executable_path=EdgeChromiumDriverManager().install())
     options = Options()
-    options.page_load_strategy = 'normal'
+    options.page_load_strategy = 'eager'
     driver = webdriver.Edge(service=service, options=options)
     driver.maximize_window()
     return driver
